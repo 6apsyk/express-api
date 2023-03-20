@@ -1,7 +1,7 @@
 import express, {Express} from 'express'
 import {Server} from 'node:http'
 import { LoggerService } from './logger/logger.service';
-import { userRoute } from './users/user';
+import { UsersController } from './users/users.controller';
 
 export class App {
 
@@ -9,15 +9,17 @@ export class App {
     app: Express;
     port: number;
     logger: LoggerService
+    userController: UsersController
 
-    constructor(logger: LoggerService){
+    constructor(logger: LoggerService, userController: UsersController){
         this.port = 8000
         this.app = express()
         this.logger = logger
+        this.userController = userController
     }
 
     useRoutes(){
-        this.app.use('users', userRoute)
+        this.app.use('users', this.userController.router)
     }
 
     async init(){
