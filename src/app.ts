@@ -2,6 +2,7 @@ import express, {Express} from 'express'
 import {Server} from 'node:http'
 import { ExeptionFilter } from './errors/exeption.filter';
 import { LoggerService } from './logger/logger.service';
+import { ILogger } from './logger/logger.service.interface';
 import { UsersController } from './users/users.controller';
 
 export class App {
@@ -9,11 +10,11 @@ export class App {
     server: Server;
     app: Express;
     port: number;
-    logger: LoggerService;
+    logger: ILogger;
     userController: UsersController;
     exeptionFilter: ExeptionFilter;
 
-    constructor(logger: LoggerService, userController: UsersController, exeptionFilter: ExeptionFilter){
+    constructor(logger: ILogger, userController: UsersController, exeptionFilter: ExeptionFilter){
         this.port = 8000
         this.app = express()
         this.logger = logger
