@@ -1,41 +1,40 @@
-import express, {Express} from 'express'
-import {Server} from 'node:http'
+import express, { Express } from 'express';
+import { Server } from 'node:http';
 import { ExeptionFilter } from './errors/exeption.filter';
 import { LoggerService } from './logger/logger.service';
 import { ILogger } from './logger/logger.service.interface';
 import { UsersController } from './users/users.controller';
-import {injectable, inject} from 'inversify'
+import { injectable, inject } from 'inversify';
 import { TYPES } from './types';
 import 'reflect-metadata';
 
 @injectable()
 export class App {
+	server: Server;
+	app: Express;
+	port: number;
 
-    server: Server;
-    app: Express;
-    port: number;
+	constructor(
+		@inject(TYPES.ILogger) private logger: ILogger,
+		@inject(TYPES.UsersController) private userController: UsersController,
+		@inject(TYPES.ExeptionFilter) private exeptionFilter: ExeptionFilter,
+	) {
+		this.port = 8000;
+		this.app = express();
+	}
 
-    constructor(
-        @inject(TYPES.ILogger) private logger: ILogger, 
-        @inject(TYPES.UsersController) private userController: UsersController,
-        @inject(TYPES.ExeptionFilter) private exeptionFilter: ExeptionFilter,
-    ){
-        this.port = 8000
-        this.app = express()
-    }
+	useRoutes(): void {
+		this.app.use('/users', this.userController.router);
+	}
 
-    useRoutes(){
-        this.app.use('/users', this.userController.router)
-    }
+	useExeptionFilter(): void {
+		this.app.use(this.exeptionFilter.catch.bind(this.exeptionFilter));
+	}
 
-    useExeptionFilter(){
-        this.app.use(this.exeptionFilter.catch.bind(this.exeptionFilter))
-    }
-
-    async init(){
-        this.useRoutes()
-        this.useExeptionFilter()
-        this.server = this.app.listen(this.port)
-        this.logger.log(`Сервер запущен на http://localhost:${this.port}`)
-    }
+	async init(): Promise<void> {
+		this.useRoutes();
+		this.useExeptionFilter();
+		this.server = this.app.listen(this.port);
+		this.logger.log(`Сервер запущен на http://localhost:${this.port}`);
+	}
 }
